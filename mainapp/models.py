@@ -63,3 +63,4 @@ class UserSkills(models.Model):
 
     def __str__(self):
         return self.user.username
+        
