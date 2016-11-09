@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
-from .models import Project, ProjectSkills, Student, UserProfile
+from .models import Project, ProjectSkills, Student, UserProfile, UserSkills
 import datetime
 
 
@@ -13,12 +13,12 @@ class LoginForm(AuthenticationForm):
 
 
 class RegistrationForm(forms.ModelForm):
-    first_name = forms.CharField(label='',required=True, widget=forms.TextInput(attrs={'placeholder': 'First_Name'}))
-    last_name = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'Last_Name'}))
-    username = forms.CharField(label='', widget=forms.TextInput(attrs={'placeholder': 'UserName'}))
-    password1 = forms.CharField(label='', widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
-    password2 = forms.CharField(label='', widget=forms.PasswordInput(attrs={'placeholder': 'Re-Enter Password'}))
-    email = forms.EmailField(label='', widget=forms.EmailInput(attrs={'placeholder': 'Email'}))
+    first_name = forms.CharField(label='First Name',required=True, widget=forms.TextInput(attrs={'placeholder': 'First Name'}))
+    last_name = forms.CharField(label='Last Name', widget=forms.TextInput(attrs={'placeholder': 'Last Name'}))
+    username = forms.CharField(label='Username', widget=forms.TextInput(attrs={'placeholder': 'Username'}))
+    password1 = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
+    password2 = forms.CharField(label='Verify Password', widget=forms.PasswordInput(attrs={'placeholder': 'Re-Enter Password'}))
+    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'placeholder': 'Email'}))
 
     class Meta:
         model = User
@@ -63,6 +63,30 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Student
         fields = ['u_gender', 'u_dob']
+
+
+class UserSkillsForm(forms.ModelForm):
+    first_skill = forms.CharField(label='Skill (1)', required=True, widget=forms.TextInput(attrs={'placeholder': 'Team Player, etc...'}))
+    second_skill = forms.CharField(label='Skill (2)', required=False, widget=forms.TextInput(attrs={'placeholder': 'Presenter, etc...'}))
+    third_skill = forms.CharField(label='Skill (3)', required=False, widget=forms.TextInput(attrs={'placeholder': 'Programming, etc...'}))
+
+
+    class Meta:
+        model = UserSkills
+        fields = ['first_skill', 'second_skill', 'third_skill']
+
+    def clean(self):
+        first_skill = self.cleaned_data['first_skill']
+        second_skill = self.cleaned_data['second_skill']
+        third_skill = self.cleaned_data['third_skill']
+        if ( 'first_skill' in self.cleaned_data and 'second_skill' in self.cleaned_data   \
+                and 'third_skill' in self.cleaned_data ) and                                   \
+                ( self.cleaned_data['first_skill'] == self.cleaned_data['second_skill']  \
+                or self.cleaned_data['first_skill'] == self.cleaned_data['third_skill']    \
+                or (self.cleaned_data['second_skill'] == self.cleaned_data['third_skill'] and self.cleaned_data['third_skill'] != '') ):
+            raise forms.ValidationError("Skills cannot be matching.")
+        return self.cleaned_data
+
 
 
 class ProjectForm(forms.ModelForm):

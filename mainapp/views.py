@@ -1,5 +1,5 @@
 from django.contrib import messages
-from .forms import RegistrationForm, ProfileForm, ProjectForm,UserProfileForm, LoginForm
+from .forms import RegistrationForm, ProfileForm, ProjectForm,UserProfileForm, LoginForm, UserSkillsForm
 from .forms import RegistrationForm, ProfileForm, ProjectForm, SearchForm
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
@@ -49,7 +49,8 @@ def user_register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST) #This will be used in POST request
         form_pro = ProfileForm(request.POST)
-        if form.is_valid() and form_pro.is_valid():
+        skill_form = UserSkillsForm(request.POST)
+        if form.is_valid() and form_pro.is_valid() and skill_form.is_valid():
             user = User.objects.create_user(
                 username=form.cleaned_data['username'],
                 email=form.cleaned_data['email'],
@@ -67,10 +68,11 @@ def user_register(request):
             messages.error(request, "Error")
 
     else:
-
         form = RegistrationForm()
         form_pro = ProfileForm()
-    return render(request, 'user_reg.html', {'form': form, 'form_pro': form_pro})
+        skill_form = UserSkillsForm()
+
+    return render(request, 'user_reg.html', {'form': form, 'skill_form': skill_form, 'form_pro': form_pro})
 
 
 def profile_update(request):
